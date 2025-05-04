@@ -56,6 +56,7 @@ Run the script in Git Bash to create a new Rust project directory (e.g., `lec007
 ## 🔍 What the Script Does
 
 - Reads or updates a counter (likely from `counter.txt` or `.lec_counter`) to generate a new directory name (e.g., `lec007`).
+- Each time the script is run, the lecture number is automatically incremented (e.g., `lec007` → `lec008`).
 - Creates a new directory with `cargo new lecXXX`.
 - Runs the project using `cargo run`.
 - Commits the changes to the Git repository.
