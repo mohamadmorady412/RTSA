@@ -1,101 +1,101 @@
 #!/bin/bash
 
-# دایرکتوری هدف
+# Target directory
 TARGET_DIR="/c/Users/moham/Documents/GitHub/kamalla"
 
-# لود متغیر محیطی از فایل .lec_counter، اگر تنظیم نشده باشد
+# Load environment variable from .lec_counter if not already set
 if [ -z "$LEC_COUNTER" ] && [ -f "$TARGET_DIR/.lec_counter" ]; then
     source "$TARGET_DIR/.lec_counter"
-    echo "LEC_COUNTER از .lec_counter لود شد: $LEC_COUNTER"
+    echo "LEC_COUNTER loaded from .lec_counter: $LEC_COUNTER"
 fi
 
-# تغییر به دایرکتوری a
+# Change to target directory
 cd "$TARGET_DIR" || {
-    echo "خطا: نمی‌توان به دایرکتوری $TARGET_DIR دسترسی پیدا کرد"
+    echo "Error: Cannot access directory $TARGET_DIR"
     exit 1
 }
-echo "دایرکتوری فعلی: $(pwd)"
+echo "Current directory: $(pwd)"
 
-# بررسی و مقداردهی اولیه متغیر محیطی LEC_COUNTER
+# Check and initialize LEC_COUNTER environment variable
 if [ -z "$LEC_COUNTER" ]; then
     export LEC_COUNTER="001"
-    echo "LEC_COUNTER با مقدار اولیه 001 تنظیم شد"
+    echo "LEC_COUNTER initialized with default value 001"
 fi
 
-# اطمینان از اینکه عدد سه‌رقمی است
+# Ensure the number is three digits
 NUMBER=$(printf "%03d" "$LEC_COUNTER")
-echo "شماره پروژه فعلی: $NUMBER"
+echo "Current project number: $NUMBER"
 
-# بررسی تغییرات Git
+# Check for Git changes
 if [ -n "$(git status --porcelain)" ]; then
-    echo "اجرای دستورات Git..."
+    echo "Executing Git commands..."
     git add .
     git commit -m "ll" || {
-        echo "خطا: کامیت ناموفق بود"
+        echo "Error: Git commit failed"
         exit 1
     }
     git push origin main || {
-        echo "خطا: push ناموفق بود"
+        echo "Error: Git push failed"
         exit 1
     }
 else
-    echo "هیچ تغییری برای کامیت وجود ندارد"
+    echo "No changes to commit"
 fi
 
-# نام پروژه
+# Project name
 PROJECT_NAME="lec$NUMBER"
-echo "نام پروژه: $PROJECT_NAME"
+echo "Project name: $PROJECT_NAME"
 
-# بررسی وجود پروژه
+# Check if project exists
 if [ -d "$PROJECT_NAME" ]; then
-    # بررسی اینکه آیا دایرکتوری یک پروژه Rust معتبر است
+    # Check if it's a valid Rust project
     if [ -f "$PROJECT_NAME/Cargo.toml" ] && [ -d "$PROJECT_NAME/src" ]; then
-        echo "پروژه $PROJECT_NAME معتبر است، وارد آن می‌شویم"
+        echo "Project $PROJECT_NAME is valid, entering directory"
     else
-        echo "دایرکتوری $PROJECT_NAME ناقص است، حذف و ایجاد مجدد"
+        echo "Directory $PROJECT_NAME is incomplete, removing and recreating"
         rm -rf "$PROJECT_NAME" || {
-            echo "خطا: نمی‌توان دایرکتوری $PROJECT_NAME را حذف کرد"
+            echo "Error: Could not remove directory $PROJECT_NAME"
             exit 1
         }
         cargo new "$PROJECT_NAME" || {
-            echo "خطا: نمی‌توان پروژه $PROJECT_NAME را ایجاد کرد"
+            echo "Error: Could not create project $PROJECT_NAME"
             exit 1
         }
     fi
 else
-    echo "ایجاد پروژه جدید: $PROJECT_NAME"
+    echo "Creating new project: $PROJECT_NAME"
     cargo new "$PROJECT_NAME" || {
-        echo "خطا: نمی‌توان پروژه $PROJECT_NAME را ایجاد کرد"
+        echo "Error: Could not create project $PROJECT_NAME"
         exit 1
     }
 fi
 
-# ورود به دایرکتوری پروژه
+# Enter project directory
 cd "$PROJECT_NAME" || {
-    echo "خطا: نمی‌توان به دایرکتوری $PROJECT_NAME وارد شد"
+    echo "Error: Could not enter directory $PROJECT_NAME"
     exit 1
 }
-echo "وارد دایرکتوری پروژه شدیم: $(pwd)"
+echo "Entered project directory: $(pwd)"
 
-# اجرای پروژه
-echo "اجرای پروژه $PROJECT_NAME..."
+# Run the project
+echo "Running project $PROJECT_NAME..."
 cargo run || {
-    echo "خطا: اجرای پروژه ناموفق بود"
+    echo "Error: Project execution failed"
     exit 1
 }
 
-# بازگشت به دایرکتوری a
+# Return to target directory
 cd "$TARGET_DIR" || {
-    echo "خطا: نمی‌توان به دایرکتوری $TARGET_DIR بازگشت"
+    echo "Error: Could not return to directory $TARGET_DIR"
     exit 1
 }
-echo "بازگشت به دایرکتوری: $(pwd)"
+echo "Returned to directory: $(pwd)"
 
-# افزایش عدد برای اجرای بعدی
+# Increment the counter for the next run
 NEXT_NUMBER=$((10#$NUMBER + 1))
 export LEC_COUNTER=$(printf "%03d" "$NEXT_NUMBER")
-echo "LEC_COUNTER به $LEC_COUNTER افزایش یافت"
+echo "LEC_COUNTER incremented to $LEC_COUNTER"
 
-# ذخیره متغیر محیطی برای جلسات بعدی
+# Save environment variable for next sessions
 echo "export LEC_COUNTER=$LEC_COUNTER" > "$TARGET_DIR/.lec_counter"
-echo "متغیر محیطی در .lec_counter ذخیره شد"
+echo "Environment variable saved to .lec_counter"
